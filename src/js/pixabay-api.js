@@ -11,12 +11,13 @@ const initParams = {
   per_page: 15,
 };
 
-export function fetchPhotos(q, page = 1) {
+export async function fetchPhotos(q, page = 1) {
   const params = new URLSearchParams({
     ...initParams,
     page,
     q,
   });
-  return axios.get(`${BASE_URL}?${params}`)
-    .then((res) => res.data);
+
+  const response = await axios.get(`${BASE_URL}?${params}`);
+  return response.data;
 }

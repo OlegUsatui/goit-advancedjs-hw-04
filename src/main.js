@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     captionDelay: 250,
   });
 
-  const fetchPhotosBtn = document.querySelector('.btn');
+  const form = document.querySelector('.search-bar');
   const loadMoreBtn = document.getElementById('loadMore');
   const searchInput = document.querySelector('.search');
   const loader = document.querySelector('.loader');
@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalPhotos = null;
   let query = '';
 
-  const handleFetchPhotos = async () => {
+  const handleFetchPhotos = async (e) => {
+    e.preventDefault();
+
     query = searchInput.value.trim();
     if (query === '') return;
 
@@ -43,15 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMoreBtn.style.display = 'none';
 
     try {
-      const photos = await fetchPhotos(query, page);
-      if (photos.hits.length === 0) {
+      const { hits, totalHits } = await fetchPhotos(query, page);
+      const photos = hits;
+      totalPhotos = totalHits;
+
+      if (photos.length === 0) {
         throw new Error(errorMessage);
       }
-      totalPhotos = photos.totalHits;
-      renderPhotos(photos.hits);
+
+      renderPhotos(photos);
       lightbox.refresh();
       searchInput.value = '';
       loadMoreBtn.style.display = 'block';
+      scrollToBottom();
     } catch (error) {
       handleFetchError(errorMessage);
     } finally {
@@ -68,13 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
         iziToast.info({ message: limitPostsMessage });
       }
 
-      const photos = await fetchPhotos(query, page);
+      const { hits } = await fetchPhotos(query, page);
+      const photos = hits;
 
-      if (photos.hits.length === 0) {
+      if (photos.length === 0) {
         throw new Error(errorMessage);
       }
-      renderPhotos(photos.hits);
+      renderPhotos(photos);
       lightbox.refresh();
+      scrollToBottom();
     } catch (error) {
       handleFetchError(errorMessage);
     } finally {
@@ -82,11 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  };
+
   const handleFetchError = (error) => {
     iziToast.error({ message: error });
     searchInput.value = '';
   };
 
-  fetchPhotosBtn.addEventListener('click', handleFetchPhotos);
+  form.addEventListener('submit', handleFetchPhotos);
   loadMoreBtn.addEventListener('click', handleLoadMorePhotos);
 });
