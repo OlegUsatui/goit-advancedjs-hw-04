@@ -91,10 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
+    const galleryItem = document.querySelector('.gallery-item');
+    if (galleryItem) {
+      const cardHeight = galleryItem.getBoundingClientRect().height;
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
   };
 
   const handleFetchError = (error) => {
